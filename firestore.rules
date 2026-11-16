@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Strict Admin check for David Music Studio owner: donboklari@gmail.com
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email == "donboklari@gmail.com";
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function isValidTrack(data) {
+      return data.clientName is string && data.clientName.size() > 0 && data.clientName.size() <= 120 &&
+             data.songTitle is string && data.songTitle.size() > 0 && data.songTitle.size() <= 150 &&
+             data.totalAmount is number && data.totalAmount >= 0 &&
+             data.advancePaid is number && data.advancePaid >= 0 &&
+             data.balanceDue is number && data.balanceDue >= 0 &&
+             data.isPaid is bool &&
+             data.paymentStatus in ['Paid in Full - Cash', 'Paid in Full - UPI', 'Pending UPI', 'verification_pending'];
+    }
+
+    function isValidSettings(data) {
+      return data.upiId is string && data.upiId.size() >= 3 && data.upiId.size() <= 100 &&
+             data.payeeName is string && data.payeeName.size() >= 1 && data.payeeName.size() <= 120;
+    }
+
+    // Client tracks collection
+    match /tracks/{trackId} {
+      allow get: if isValidId(trackId);
+      allow list: if isAdmin();
+      allow create: if isAdmin() && isValidTrack(request.resource.data);
+      allow update: if (isAdmin() && isValidTrack(request.resource.data)) || 
+                     (isValidId(trackId) && 
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['paymentStatus', 'utrNote', 'notifiedAt', 'paymentNotified']) &&
+                      request.resource.data.paymentStatus == 'verification_pending' &&
+                      isValidTrack(request.resource.data));
+      allow delete: if isAdmin();
+    }
+
+    // Studio Settings
+    match /settings/{settingsId} {
+      allow read: if isValidId(settingsId);
+      allow write: if isAdmin() && isValidSettings(request.resource.data);
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "DAVID MUSIC STUDIO",
+  "description": "Professional audio mastering & production delivery portal with secure client audio previews and UPI settlement.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

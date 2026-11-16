@@ -1,0 +1,153 @@
+{
+  "entities": {
+    "Track": {
+      "title": "Track",
+      "description": "Audio production client project record with mastering files and payment status",
+      "type": "object",
+      "properties": {
+        "clientName": {
+          "type": "string",
+          "description": "Full name of the music production client",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "songTitle": {
+          "type": "string",
+          "description": "Title of the song or track",
+          "minLength": 1,
+          "maxLength": 150
+        },
+        "genre": {
+          "type": "string",
+          "description": "Musical genre",
+          "maxLength": 80
+        },
+        "tempoBpm": {
+          "type": "number",
+          "description": "Tempo in BPM"
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Total fee in INR"
+        },
+        "advancePaid": {
+          "type": "number",
+          "description": "Advance fee paid in INR"
+        },
+        "balanceDue": {
+          "type": "number",
+          "description": "Remaining balance fee in INR"
+        },
+        "isPaid": {
+          "type": "boolean",
+          "description": "Flag indicating if track is fully settled and master WAV unlocked"
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "Payment status description",
+          "enum": ["Paid in Full - Cash", "Paid in Full - UPI", "Pending UPI", "verification_pending"]
+        },
+        "audioPreviewUrl": {
+          "type": "string",
+          "description": "Public URL for 128kbps watermarked MP3 preview stream",
+          "maxLength": 2048
+        },
+        "masterWavUrl": {
+          "type": "string",
+          "description": "URL for 24-bit lossless master WAV download (only exposed when isPaid is true)",
+          "maxLength": 2048
+        },
+        "previewFileName": {
+          "type": "string",
+          "description": "Filename of the preview MP3",
+          "maxLength": 255
+        },
+        "masterWavFileName": {
+          "type": "string",
+          "description": "Filename of the master WAV",
+          "maxLength": 255
+        },
+        "masterWavFileSize": {
+          "type": "string",
+          "description": "Human readable size of the master WAV",
+          "maxLength": 50
+        },
+        "sampleRate": {
+          "type": "string",
+          "description": "Mastering sample rate and bit depth specification",
+          "maxLength": 100
+        },
+        "lufsIntegrated": {
+          "type": "string",
+          "description": "Master integrated loudness level",
+          "maxLength": 50
+        },
+        "truePeak": {
+          "type": "string",
+          "description": "Master true peak level",
+          "maxLength": 50
+        },
+        "paymentNotified": {
+          "type": "boolean",
+          "description": "Whether client sent a payment settlement notification"
+        },
+        "utrNote": {
+          "type": "string",
+          "description": "Optional reference or UTR note submitted by client during verification request",
+          "maxLength": 500
+        },
+        "notifiedAt": {
+          "type": "string",
+          "description": "ISO timestamp of when payment notification was sent",
+          "maxLength": 50
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of creation",
+          "maxLength": 50
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update",
+          "maxLength": 50
+        }
+      },
+      "required": ["clientName", "songTitle", "totalAmount", "advancePaid", "balanceDue", "isPaid", "paymentStatus"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Studio-wide settings for payments and branding",
+      "type": "object",
+      "properties": {
+        "upiId": {
+          "type": "string",
+          "description": "Studio UPI ID for receiving payments",
+          "minLength": 3,
+          "maxLength": 100
+        },
+        "payeeName": {
+          "type": "string",
+          "description": "Payee name displayed in UPI apps",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update",
+          "maxLength": 50
+        }
+      },
+      "required": ["upiId", "payeeName"]
+    }
+  },
+  "firestore": {
+    "/tracks/{trackId}": {
+      "schema": "Track",
+      "description": "Client audio projects collection. Public read by track ID; create, update, delete restricted to admin. Clients can submit payment verification."
+    },
+    "/settings/{settingsId}": {
+      "schema": "Settings",
+      "description": "Studio configuration settings. Public read; write restricted to admin."
+    }
+  }
+}
